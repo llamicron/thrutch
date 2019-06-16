@@ -32,12 +32,11 @@ impl Server {
     }
 
     pub fn connect(&self) -> ExitStatus {
-        // let mut ssh = Command::new("sh");
-        // ssh.arg("-c");
-        // ssh.arg(format!("ssh {}", self.address()));
+        let mut ssh = Command::new("sh");
+        ssh.arg("-c");
+        ssh.arg(format!("ssh {}", self.address()));
 
-        // return ssh.status().expect("Something went horribly wrong :(");
-        unimplemented!();
+        return ssh.status().expect("Something went horribly wrong :(");
     }
 }
 

@@ -28,6 +28,9 @@ fn help() {
     add             Adds a new server
     remove          Removes a server
     connect         Connect to a server
+
+    Thrutch does not handle passwords or ssh keys. It only stars an ssh connection,
+    mostly so you don't have to remember usernames and IPs.
     ", VERSION);
     println!("{}", help_page);
 }
@@ -41,6 +44,11 @@ fn main() {
         help();
         process::exit(0);
     };
+
+    if args.contains(&String::from("--version")) {
+        println!("Thrutch v{}", VERSION);
+        process::exit(0);
+    }
 
     match args[1].as_str() {
         "add" => manager.create(),
