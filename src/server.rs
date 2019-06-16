@@ -7,7 +7,7 @@ use serde::{Serialize, Deserialize};
 pub struct Server {
     pub name: String,
     ip: Ipv4Addr,
-    location: String,
+    pub location: String,
     username: String
 }
 

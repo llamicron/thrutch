@@ -12,7 +12,13 @@ mod manager;
 use server::Server;
 use manager::Manager;
 
-use std::env;
-
 fn main() {
+    let mut man = Manager::new();
+
+    man.table();
+
+    let server = Server::new("Test server", "pi", "192.68.0.1", "Downstairs").expect("Couldnt create server");
+    man.add(server);
+
+    man.table();
 }

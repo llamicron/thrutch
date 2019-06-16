@@ -73,6 +73,17 @@ impl Manager {
         };
 
     }
+
+    pub fn table(&self) {
+        let mut table = Table::new();
+
+        table.add_row(row!["Name", "Address", "Location"]);
+        for server in &self.servers {
+            table.add_row(row![&server.name, server.address(), &server.location]);
+        }
+
+        table.printstd();
+    }
 }
 
 #[cfg(test)]
