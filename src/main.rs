@@ -1,1 +1,1 @@
-mod devices;
+mod server;
