@@ -29,7 +29,7 @@ fn help() {
     remove          Removes a server
     connect         Connect to a server
 
-    Thrutch does not handle passwords or ssh keys. It only stars an ssh connection,
+    Thrutch does not handle passwords or ssh keys. It only stores an ssh connection,
     mostly so you don't have to remember usernames and IPs.
     ", VERSION);
     println!("{}", help_page);
