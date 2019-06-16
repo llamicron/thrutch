@@ -139,6 +139,8 @@ impl Manager {
         } else {
             println!("Something went wrong when adding a server");
         }
+
+        self.table();
     }
 
     // Asks for user input and removes that server, uses `remove`
