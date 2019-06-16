@@ -1,7 +1,7 @@
-use std::net::Ipv4Addr;
 use std::fmt;
+use std::net::Ipv4Addr;
 use serde::{Serialize, Deserialize};
-// use std::process::{Command, ExitStatus};
+use std::process::{Command, ExitStatus};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Server {
@@ -31,13 +31,14 @@ impl Server {
         format!("{}@{}", self.username, self.ip)
     }
 
-    // pub fn connect(&self) -> ExitStatus {
-    //     let mut ssh = Command::new("sh");
-    //     ssh.arg("-c");
-    //     ssh.arg(format!("ssh {}", self.address()));
+    pub fn connect(&self) -> ExitStatus {
+        // let mut ssh = Command::new("sh");
+        // ssh.arg("-c");
+        // ssh.arg(format!("ssh {}", self.address()));
 
-    //     return ssh.status().expect("Something went horribly wrong :(");
-    // }
+        // return ssh.status().expect("Something went horribly wrong :(");
+        unimplemented!();
+    }
 }
 
 impl fmt::Display for Server {
@@ -45,7 +46,6 @@ impl fmt::Display for Server {
         write!(f, "{}: {}@{}; {}", self.name, self.username, self.ip, self.location)
     }
 }
-
 
 
 #[cfg(test)]

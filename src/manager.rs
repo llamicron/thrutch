@@ -1,7 +1,8 @@
 use std::path::{PathBuf, Path};
-use std::fs::{File};
-use std::fs;
+use std::fs::{self, File};
+use std::io;
 use std::env;
+use std::net::Ipv4Addr;
 
 use dirs;
 use serde::{Serialize, Deserialize};
@@ -18,6 +19,17 @@ pub struct Manager {
 
 // Associated Items
 impl Manager {
+    pub fn new() -> Manager {
+        let storage_file = Manager::storage_file();
+
+        let mut manager = Manager {
+            servers: Vec::new(),
+            storage_file
+        };
+        manager.read_servers();
+        manager
+    }
+
     fn storage_file() -> PathBuf {
         let mut storage_file = dirs::config_dir().expect("Cannot get your config directory");
 
@@ -35,36 +47,63 @@ impl Manager {
         storage_file
     }
 
-    pub fn new() -> Manager {
-        let storage_file = Manager::storage_file();
+    fn get_user_input(prompt: &str) -> String {
+        print!("{}", prompt);
+        io::Write::flush(&mut io::stdout()).expect("flush failed!");
 
-        let mut manager = Manager {
-            servers: Vec::new(),
-            storage_file
+        let mut value = String::new();
+        if let Err(err) = io::stdin().read_line(&mut value) {
+            println!("Could not parse input: {}", err);
         };
-        manager.read_servers();
-        manager
+
+        value.trim().to_owned()
     }
+
+    fn required_input(prompt: &str) -> String {
+        loop {
+            let value = Manager::get_user_input(prompt);
+            if value.len() < 1 {
+                println!("Need an input here");
+            } else if value.len() > 25 {
+                println!("Input too long");
+            } else {
+                return value;
+            }
+        }
+    }
+
+    // Keeps asking for input until a valid IPv4 address is entered
+    fn ip_required_input(prompt: &str) -> Ipv4Addr {
+        loop {
+            let ip = Manager::required_input(prompt);
+            match ip.parse::<Ipv4Addr>() {
+                Ok(addr) => return addr,
+                Err(_) => { println!("Need a valid IPv4 address") }
+            }
+        }
+    }
+
+
 }
 
 // Methods
 impl Manager {
-    pub fn add(&mut self, server: Server) {
+    fn add(&mut self, server: Server) {
         self.servers.push(server);
         self.write_servers();
     }
 
-    pub fn remove(&mut self, name: &str) {
+    fn remove(&mut self, name: &str) {
         self.servers.retain(|server| server.name != name);
         self.write_servers();
     }
 
-    pub fn write_servers(&self) {
+    fn write_servers(&self) {
         let to_write = serde_json::to_string(&self.servers).expect("Couldnt serialize servers!");
         fs::write(&Path::new(self.storage_file.as_os_str()), &to_write).expect("Couldnt write data to file!");
     }
 
-    pub fn read_servers(&mut self) {
+    fn read_servers(&mut self) {
         let server_data = fs::read_to_string(&self.storage_file).expect("Couldnt open storage file");
         // TODO: Try to implement from_reader?
         self.servers = match serde_json::from_str(&server_data) {
@@ -74,6 +113,8 @@ impl Manager {
 
     }
 
+    // User functions
+    // Prints a table of all servers
     pub fn table(&self) {
         let mut table = Table::new();
 
@@ -83,6 +124,48 @@ impl Manager {
         }
 
         table.printstd();
+    }
+
+    // Creates a new server through user input, uses `add`
+    pub fn create(&mut self) {
+        let name = Manager::required_input("Server name: ");
+        let username = Manager::required_input("Username: ");
+        let ip: Ipv4Addr = Manager::ip_required_input("IP: ");
+        // This one isn't required
+        let location = Manager::get_user_input("Location: ");
+
+        if let Ok(server) = Server::new(&name, &username, &format!("{}", ip), &location) {
+            self.add(server);
+        } else {
+            println!("Something went wrong when adding a server");
+        }
+    }
+
+    // Asks for user input and removes that server, uses `remove`
+    pub fn delete(&mut self) {
+        self.table();
+        let old_len = self.servers.len();
+
+        let name = Manager::required_input("Server to remove: ");
+
+        self.remove(&name);
+        if self.servers.len() < old_len {
+            println!("Server removed");
+        } else {
+            println!("Couldn't find that server");
+        }
+    }
+
+    // Ask for a name and try to connect to that server, uses `server.connect`
+    pub fn connect(&mut self) {
+        self.table();
+        let name = Manager::required_input("Connect to: ");
+
+        if let Some(server) = self.servers.iter().find(|&server| server.name == name) {
+            server.connect();
+        } else {
+            println!("Couldn't find server '{}'", name);
+        }
     }
 }
 
@@ -129,6 +212,8 @@ pub mod tests {
 
         assert_eq!(manager.servers.len(), 2);
         manager.remove("remove me");
+        assert_eq!(manager.servers.len(), 1);
+        manager.remove("");
         assert_eq!(manager.servers.len(), 1);
 
         teardown();

@@ -1,24 +1,52 @@
 #![allow(dead_code, unused_imports)]
 
-#[macro_use]
-extern crate prettytable;
+#[macro_use] extern crate prettytable;
+#[macro_use] extern crate text_io;
 extern crate dirs;
 extern crate serde;
 extern crate serde_json;
 
+
 mod server;
 mod manager;
 
-use server::Server;
+use std::env;
+use std::process;
 use manager::Manager;
 
+
+
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
+// Prints the help page
+fn help() {
+    let help_page = format!("
+    Thrutch v{}
+
+    Commands:
+    list            List all servers
+    add             Adds a new server
+    remove          Removes a server
+    connect         Connect to a server
+    ", VERSION);
+    println!("{}", help_page);
+}
+
 fn main() {
-    let mut man = Manager::new();
+    let args: Vec<String> = env::args().collect();
 
-    man.table();
+    let mut manager = Manager::new();
 
-    let server = Server::new("Test server", "pi", "192.68.0.1", "Downstairs").expect("Couldnt create server");
-    man.add(server);
+    if args.len() < 2 {
+        help();
+        process::exit(0);
+    };
 
-    man.table();
+    match args[1].as_str() {
+        "add" => manager.create(),
+        "remove" => manager.delete(),
+        "connect" => manager.connect(),
+        "list" => manager.table(),
+        _ => help()
+    }
 }
