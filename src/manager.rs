@@ -8,8 +8,6 @@ use serde::{Serialize, Deserialize};
 use prettytable::{Table, Row, Cell};
 
 use crate::server::Server;
-use crate::dev;
-
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -21,18 +19,16 @@ pub struct Manager {
 // Associated Items
 impl Manager {
     fn storage_file() -> PathBuf {
-        let ext = if dev() { "dev" } else { "json" };
-
-
         let mut storage_file = dirs::config_dir().expect("Cannot get your config directory");
-        storage_file.push("thrutch_data.json");
-        storage_file = storage_file.with_extension(ext);
+
+        // TODO: Change this to .json for prod
+        storage_file.push("thrutch_data.dev");
 
         // Create if not exists
         if !Path::new(storage_file.as_os_str()).exists() {
             match File::create(Path::new(storage_file.as_os_str())) {
                 Ok(_) => {},
-                Err(e) => println!("Warning! storage file could not be created at {}. Server information will not be saved.", storage_file.display())
+                Err(_) => println!("Warning! storage file could not be created at {}. Server information will not be saved.", storage_file.display())
             };
         }
 
@@ -84,48 +80,21 @@ pub mod tests {
     use super::*;
 
     pub fn teardown() {
-        // Truncates both files
-        env::set_var("THRUTCH_DEV", "0");
-        File::create(Manager::storage_file());
-        env::set_var("THRUTCH_DEV", "1");
-        File::create(Manager::storage_file());
-    }
-
-    #[test]
-    fn correct_file() {
-        teardown();
-
-        let mut expected_file = dirs::config_dir().expect("Cannot get your config directory");
-
-        let ext = if dev() { "dev" } else { "json" };
-        println!("{:?}", dev());
-        expected_file.push("thrutch_data");
-        expected_file = expected_file.with_extension(ext);
-
-        assert_eq!(Manager::storage_file(), expected_file);
-
-        teardown();
+        // Truncates the file
+        File::create(Manager::storage_file()).expect("Couldn't truncate file");
     }
 
     #[test]
     fn new_manager() {
+        teardown();
         Manager::new();
-    }
-
-    #[test]
-    fn environment_variables() {
-        env::set_var("THRUTCH_DEV", "0");
-        assert!(!dev());
-        assert_eq!(Manager::new().storage_file.extension().unwrap(), "json");
-        env::set_var("THRUTCH_DEV", "1");
-        assert!(dev());
-        assert_eq!(Manager::new().storage_file.extension().unwrap(), "dev");
-
         teardown();
     }
 
     #[test]
     fn add_server() {
+        teardown();
+
         let mut manager = Manager::new();
         let server = Server::new("Brewpi", "llamicron", "192.168.0.1", "Outside").expect("Something went wrong :(");
 
@@ -138,6 +107,8 @@ pub mod tests {
 
     #[test]
     fn remove_server() {
+        teardown();
+
         let mut manager = Manager::new();
         let server1 = Server::new("Some Server", "llamicron", "192.168.0.1", "Outside").expect("Something went wrong :(");
         let server2 = Server::new("remove me", "llamicron", "192.168.0.1", "Outside").expect("Something went wrong :(");
@@ -151,4 +122,5 @@ pub mod tests {
 
         teardown();
     }
+
 }

@@ -14,12 +14,5 @@ use manager::Manager;
 
 use std::env;
 
-fn dev() -> bool {
-    match env::var("THRUTCH_DEV") {
-        Ok(x)  => x == "1",
-        Err(_) =>  false
-    }
-}
-
 fn main() {
 }
