@@ -28,10 +28,14 @@ fn help() {
      - add                Adds a new server
      - remove             Removes a server
      - connect [server]   Connect to a server
+     - backup             Backs up the storage file
+
 
     Thrutch does not handle passwords or ssh keys. It only stores an ssh connection,
     mostly so you don't have to remember usernames and IPs.
-    ", VERSION);
+
+    Thrutch data file: {}
+    ", VERSION, Manager::new().storage_file.display());
     println!("{}", help_page);
 }
 
@@ -61,6 +65,8 @@ fn main() {
             }
         },
         "list" => manager.table(),
+        // "file" => println!("{}", manager.storage_file.display()),
+        "backup" => manager.backup(),
         _ => help()
     }
 }

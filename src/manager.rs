@@ -14,7 +14,7 @@ use crate::server::Server;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Manager {
     pub servers: Vec<Server>,
-    storage_file: PathBuf,
+    pub storage_file: PathBuf,
 }
 
 // Associated Items
@@ -175,6 +175,17 @@ impl Manager {
             println!("Couldn't find server '{}'", name);
         }
     }
+
+    pub fn backup(&mut self) {
+        let backup_file = self.storage_file.with_extension("bak");
+        println!("Backing up storage file to {}...", backup_file.display());
+
+        match fs::copy(&self.storage_file, &backup_file) {
+            Ok(_) => println!("Success"),
+            Err(error) => println!("Error. Could not backup: {}", error)
+        };
+    }
+
 }
 
 #[cfg(test)]
