@@ -11,6 +11,7 @@ pub struct Server {
     username: String
 }
 
+// Associated Items
 impl Server {
     pub fn new(name: &str, username: &str, ip: &str, location: &str) -> Result<Server, &'static str> {
         let parsed_ip = match ip.parse::<Ipv4Addr>() {
@@ -26,7 +27,10 @@ impl Server {
         };
         Ok(server)
     }
+}
 
+// Methods
+impl Server {
     pub fn address(&self) -> String {
         format!("{}@{}", self.username, self.ip)
     }

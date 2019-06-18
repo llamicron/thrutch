@@ -171,6 +171,7 @@ impl Manager {
         if let Some(server) = self.servers.iter().find(|&server| server.name == name) {
             println!("Connecting to {}...", server.name);
             server.connect();
+            println!("\nExited. Welcome back.\n");
         } else {
             println!("Couldn't find server '{}'", name);
         }
