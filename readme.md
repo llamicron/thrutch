@@ -22,10 +22,10 @@ $ thrutch
 ## Usage
 These are the current commands:
 ```
-$ thrutch list           # list all servers
-$ thrutch add            # add a new server
-$ thrutch remove         # remove a server
-$ thrutch connect        # connect to a server
+$ thrutch list               # list all servers
+$ thrutch add                # add a new server
+$ thrutch remove             # remove a server
+$ thrutch connect [server]   # connect to a server
 
 $ thrutch                # see the help page
 $ thrutch --version      # see the current version

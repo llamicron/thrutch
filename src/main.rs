@@ -24,10 +24,10 @@ fn help() {
     Thrutch v{}
 
     Commands:
-    list            List all servers
-    add             Adds a new server
-    remove          Removes a server
-    connect         Connect to a server
+    list               List all servers
+    add                Adds a new server
+    remove             Removes a server
+    connect [server]   Connect to a server
 
     Thrutch does not handle passwords or ssh keys. It only stores an ssh connection,
     mostly so you don't have to remember usernames and IPs.
