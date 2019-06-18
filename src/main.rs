@@ -53,7 +53,13 @@ fn main() {
     match args[1].as_str() {
         "add" => manager.create(),
         "remove" => manager.delete(),
-        "connect" => manager.connect(),
+        "connect" => {
+            if args.len() > 2 {
+                manager.connect(Some(args[2].clone()));
+            } else {
+                manager.connect(None);
+            }
+        },
         "list" => manager.table(),
         _ => help()
     }

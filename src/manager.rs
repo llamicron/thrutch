@@ -159,11 +159,17 @@ impl Manager {
     }
 
     // Ask for a name and try to connect to that server, uses `server.connect`
-    pub fn connect(&mut self) {
-        self.table();
-        let name = Manager::required_input("Connect to: ");
+    pub fn connect(&mut self, server_name: Option<String>) {
+
+        let mut name: String = server_name.unwrap_or(String::from(""));
+
+        if name.len() == 0 {
+            self.table();
+            name = Manager::required_input("Connect to: ");
+        };
 
         if let Some(server) = self.servers.iter().find(|&server| server.name == name) {
+            println!("Connecting to {}...", server.name);
             server.connect();
         } else {
             println!("Couldn't find server '{}'", name);
