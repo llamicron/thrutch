@@ -117,13 +117,13 @@ impl Manager {
     // Prints a table of all servers
     pub fn table(&self) {
         let mut table = Table::new();
-
+        
         table.add_row(row!["Name", "Address", "Location"]);
         for server in &self.servers {
             table.add_row(row![&server.name, server.address(), &server.location]);
         }
-
-        table.printstd();
+        
+        println!("{}", table);
     }
 
     // Creates a new server through user input, uses `add`

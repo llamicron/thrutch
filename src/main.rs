@@ -43,17 +43,17 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let mut manager = Manager::new();
-
+    
     if args.len() < 2 {
         help();
         process::exit(0);
     };
-
+    
     if args.contains(&String::from("--version")) {
         println!("Thrutch v{}", VERSION);
         process::exit(0);
     }
-
+    
     match args[1].as_str() {
         "add" => manager.create(),
         "remove" => manager.delete(),
