@@ -9,6 +9,7 @@ extern crate serde_json;
 
 mod server;
 mod manager;
+mod cli;
 
 use std::env;
 use std::process;
@@ -71,3 +72,4 @@ fn main() {
         _ => help()
     }
 }
+
