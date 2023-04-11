@@ -33,7 +33,6 @@ impl Manager {
     fn storage_file() -> PathBuf {
         let mut storage_file = dirs::config_dir().expect("Cannot get your config directory");
 
-        // TODO: Change this to .json for prod
         storage_file.push("thrutch_data.json");
 
         // Create if not exists
