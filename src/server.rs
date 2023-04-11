@@ -6,9 +6,9 @@ use std::process::{Command, ExitStatus};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Server {
     pub name: String,
-    ip: Ipv4Addr,
+    pub ip: Ipv4Addr,
     pub location: String,
-    username: String
+    pub username: String
 }
 
 impl Server {

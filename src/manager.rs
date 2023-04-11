@@ -1,6 +1,6 @@
 use std::path::{PathBuf, Path};
 use std::fs::{self, File};
-use std::io;
+use std::{io, process};
 use std::env;
 use std::net::Ipv4Addr;
 
@@ -140,6 +140,46 @@ impl Manager {
         }
 
         self.table();
+    }
+
+    pub fn edit(&mut self) {
+        // This just runs through the create function again but 
+        // sets the current values as the default
+        let server_name_to_edit = Manager::required_input("Server name to edit: ");
+        if let Some(server) = self.servers.iter_mut().find(|s| s.name == server_name_to_edit ) {
+            let new_name = Manager::get_user_input(&format!("Server name [{}]: ", server.name));
+            let new_username = Manager::get_user_input(&format!("Username [{}]: ", server.username));
+            let new_ip = Manager::get_user_input(&format!("IP [{}]: ", server.ip));
+            let new_location = Manager::get_user_input(&format!("Server location [{}]: ", server.location));
+
+            if !new_name.is_empty() {
+                server.name = new_name;
+            }
+
+            if !new_username.is_empty() {
+                server.username = new_username;
+            }
+            
+            if !new_ip.is_empty() {
+                match new_ip.parse::<Ipv4Addr>() {
+                    Ok(ip) => server.ip = ip,
+                    Err(e) => {
+                        eprintln!("Error: {e}");
+                        process::exit(1);
+                    }
+                }
+            }
+
+            if !new_location.is_empty() {
+                server.location = new_location;
+            }
+
+            println!("Server details changed");
+            self.write_servers();
+        } else {
+            eprintln!("Couldn't find that server'");
+        }
+        
     }
 
     // Asks for user input and removes that server, uses `remove`

@@ -64,6 +64,7 @@ fn main() {
                 manager.connect(None);
             }
         },
+        "edit" => manager.edit(),
         "list" => manager.table(),
         // "file" => println!("{}", manager.storage_file.display()),
         "backup" => manager.backup(),
