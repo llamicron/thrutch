@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::{io, process};
 
 use dirs;
+use log::*;
 use prettytable::{Cell, Row, Table};
 use serde::{Deserialize, Serialize};
 
@@ -30,15 +31,27 @@ impl Manager {
     }
 
     fn storage_file() -> PathBuf {
-        let mut storage_file = dirs::config_dir().expect("Cannot get your config directory");
+        // First, try to get the file from an env variable
+        // If that doesn't work, get the default which is in the config dir
+        let storage_file = match std::env::var("THRUTCH_STORAGE_FILE") {
+            Ok(overwrite_path) => PathBuf::from(overwrite_path),
+            Err(_) => {
+                let mut default_path =
+                    dirs::config_dir().expect("Cannot get your config directory");
+                default_path.push("thrutch_data.json");
+                default_path
+            }
+        };
 
-        storage_file.push("thrutch_data.json");
+        info!("Using storage file {}", storage_file.display());
 
         // Create if not exists
-        if !Path::new(storage_file.as_os_str()).exists() {
-            match File::create(Path::new(storage_file.as_os_str())) {
-                Ok(_) => {},
-                Err(_) => println!("Warning! storage file could not be created at {}. Server information will not be saved.", storage_file.display())
+        // I think there's a better way to do this than .as_os_str()
+        if !storage_file.exists() {
+            info!("Storage file does not exist, creating it now...");
+            match File::create(&storage_file) {
+                Ok(_) => info!("Storage file created at {}", storage_file.display()),
+                Err(_) => error!("Error! storage file could not be created at {}. Server information will not be saved.", storage_file.display())
             };
         }
 
