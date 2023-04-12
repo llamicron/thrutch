@@ -1,15 +1,14 @@
-use std::path::{PathBuf, Path};
-use std::fs::{self, File};
-use std::{io, process};
 use std::env;
+use std::fs::{self, File};
 use std::net::Ipv4Addr;
+use std::path::{Path, PathBuf};
+use std::{io, process};
 
 use dirs;
-use serde::{Serialize, Deserialize};
-use prettytable::{Table, Row, Cell};
+use prettytable::{Cell, Row, Table};
+use serde::{Deserialize, Serialize};
 
 use crate::server::Server;
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Manager {
@@ -24,7 +23,7 @@ impl Manager {
 
         let mut manager = Manager {
             servers: Vec::new(),
-            storage_file
+            storage_file,
         };
         manager.read_servers();
         manager
@@ -77,12 +76,12 @@ impl Manager {
             let ip = Manager::required_input(prompt);
             match ip.parse::<Ipv4Addr>() {
                 Ok(addr) => return addr,
-                Err(_) => { println!("Need a valid IPv4 address") }
+                Err(_) => {
+                    println!("Need a valid IPv4 address")
+                }
             }
         }
     }
-
-
 }
 
 // Methods
@@ -99,15 +98,17 @@ impl Manager {
 
     fn write_servers(&self) {
         let to_write = serde_json::to_string(&self.servers).expect("Couldnt serialize servers!");
-        fs::write(&Path::new(self.storage_file.as_os_str()), &to_write).expect("Couldnt write data to file!");
+        fs::write(&Path::new(self.storage_file.as_os_str()), &to_write)
+            .expect("Couldnt write data to file!");
     }
 
     fn read_servers(&mut self) {
-        let server_data = fs::read_to_string(&self.storage_file).expect("Couldnt open storage file");
+        let server_data =
+            fs::read_to_string(&self.storage_file).expect("Couldnt open storage file");
         // TODO: Try to implement from_reader?
         self.servers = match serde_json::from_str(&server_data) {
             Ok(servers) => servers,
-            Err(_) => Vec::new()
+            Err(_) => Vec::new(),
         };
     }
 
@@ -115,12 +116,12 @@ impl Manager {
     // Prints a table of all servers
     pub fn table(&self) {
         let mut table = Table::new();
-        
+
         table.add_row(row!["Name", "Address", "Location"]);
         for server in &self.servers {
             table.add_row(row![&server.name, server.address(), &server.location]);
         }
-        
+
         println!("{}", table);
     }
 
@@ -142,12 +143,15 @@ impl Manager {
     }
 
     pub fn edit(&mut self) {
-        // This just runs through the create function again but 
+        // This just runs through the create function again but
         // sets the current values as the default
         let found_server = None;
         while found_server.is_none() {
             let server_name_to_edit = Manager::required_input("Server name to edit: ");
-            let found_server = self.servers.iter_mut().find(|s| s.name == server_name_to_edit );
+            let found_server = self
+                .servers
+                .iter_mut()
+                .find(|s| s.name == server_name_to_edit);
 
             if found_server.is_none() {
                 eprintln!("Couldn't find that server");
@@ -159,7 +163,8 @@ impl Manager {
         let new_name = Manager::get_user_input(&format!("Server name [{}]: ", server.name));
         let new_username = Manager::get_user_input(&format!("Username [{}]: ", server.username));
         let new_ip = Manager::get_user_input(&format!("IP [{}]: ", server.ip));
-        let new_location = Manager::get_user_input(&format!("Server location [{}]: ", server.location));
+        let new_location =
+            Manager::get_user_input(&format!("Server location [{}]: ", server.location));
 
         if !new_name.is_empty() {
             server.name = new_name;
@@ -185,7 +190,6 @@ impl Manager {
 
         println!("Server details changed");
         self.write_servers();
-        
     }
 
     // Asks for user input and removes that server, uses `remove`
@@ -205,7 +209,6 @@ impl Manager {
 
     // Ask for a name and try to connect to that server, uses `server.connect`
     pub fn connect(&mut self, server_name: Option<String>) {
-
         let mut name: String = server_name.unwrap_or(String::from(""));
 
         if name.len() == 0 {
@@ -227,10 +230,9 @@ impl Manager {
 
         match fs::copy(&self.storage_file, &backup_file) {
             Ok(_) => println!("Success"),
-            Err(error) => println!("Error. Could not backup: {}", error)
+            Err(error) => println!("Error. Could not backup: {}", error),
         };
     }
-
 }
 
 #[cfg(test)]
@@ -254,7 +256,8 @@ pub mod tests {
         teardown();
 
         let mut manager = Manager::new();
-        let server = Server::new("Brewpi", "llamicron", "192.168.0.1", "Outside").expect("Something went wrong :(");
+        let server = Server::new("Brewpi", "llamicron", "192.168.0.1", "Outside")
+            .expect("Something went wrong :(");
 
         assert_eq!(manager.servers.len(), 0);
         manager.add(server);
@@ -268,8 +271,10 @@ pub mod tests {
         teardown();
 
         let mut manager = Manager::new();
-        let server1 = Server::new("Some Server", "llamicron", "192.168.0.1", "Outside").expect("Something went wrong :(");
-        let server2 = Server::new("remove me", "llamicron", "192.168.0.1", "Outside").expect("Something went wrong :(");
+        let server1 = Server::new("Some Server", "llamicron", "192.168.0.1", "Outside")
+            .expect("Something went wrong :(");
+        let server2 = Server::new("remove me", "llamicron", "192.168.0.1", "Outside")
+            .expect("Something went wrong :(");
 
         manager.add(server1);
         manager.add(server2);
@@ -282,5 +287,4 @@ pub mod tests {
 
         teardown();
     }
-
 }
