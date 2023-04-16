@@ -12,6 +12,7 @@ mod cli;
 mod manager;
 mod server;
 
+use cli::CLIError;
 use cli::CLI;
 use manager::Manager;
 use std::env;
@@ -44,10 +45,10 @@ fn help() {
     println!("{}", help_page);
 }
 
-fn main() {
+fn main() -> Result<(), CLIError> {
     let args: Vec<String> = env::args().collect();
 
-    let mut manager = Manager::new();
+    let mut cli = CLI::new(std::io::stdin().lock());
 
     if args.len() < 2 {
         help();
@@ -60,19 +61,22 @@ fn main() {
     }
 
     match args[1].as_str() {
-        "add" => manager.create(),
-        "remove" => manager.delete(),
+        "add" => cli.create()?,
+        "remove" => cli.delete()?,
         "connect" => {
             if args.len() > 2 {
-                manager.connect(Some(args[2].clone()));
+                cli.connect(Some(args[2].clone()))?;
             } else {
-                manager.connect(None);
+                cli.connect(None)?;
             }
         }
-        "edit" => manager.edit(),
-        "list" => manager.table(),
+        // "edit" => manager.edit(),
+        "list" => {
+            println!("{}", cli.table());
+        }
         // "file" => println!("{}", manager.storage_file.display()),
-        "backup" => manager.backup(),
+        // "backup" => manager.backup(),
         _ => help(),
-    }
+    };
+    Ok(())
 }
